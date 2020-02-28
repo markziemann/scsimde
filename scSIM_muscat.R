@@ -67,7 +67,7 @@ pb <- aggregateData(sim,
                     by = c("cluster_id", "sample_id"))
 
 res <- pbDS(pb, verbose = TRUE)
-tbl <- res$table$B
+# tbl <- res$table$B
 
 
 for (CELL_ID in names(tbl)) {
@@ -82,22 +82,42 @@ for (CELL_ID in names(tbl)) {
 # create random gene sets
 ##########################################################
 randomGeneSets<-function(a){
-  gsets<-sapply( rep(50,1000) , function(x) {list(as.character(sample(rownames(a),x))) } )
+  gsets<-sapply( rep(50,1000) , function(x) {list(as.character(sample(a,x))) } )
   names(gsets)<-stri_rand_strings(length(gsets), 15, pattern = "[A-Za-z]")
   gsets
 }
 
+library(stringi)
 mygenes <- unique(gi$gene)
+gsets <- randomGeneSets(mygenes)
 
 # TODO here need to set the ground truth gene sets
+y <- list()
+n=0
+for ( CELL_ID in unique(gi$cluster_id) ) {
+  n=n+1
+  y1<-list(subset(gi,logFC>0 & cluster_id==CELL_ID)$gene)
+  y2<-list(subset(gi,logFC<0 & cluster_id==CELL_ID)$gene)
+  #y[n]<-c(y1,y2)
+  y[n] <- y1
+  }
+
+
+#getDEsets<-function(CELL_ID) {
+#    y1<-list(subset(gi,logFC>0 & cluster_id=="NK cells")$gene)
+#  y2
+#  }  
+
 
 ##########################################################
 # analyse with mitch
 ##########################################################
 
-x<-mitch_import(res$table$B,DEtype="muscat",geneIDcol = "gene")
+x <- mitch_import(res$table$B, DEtype = "muscat", geneIDcol = "gene")
 
+mitch_res <- mitch_calc(x,gsets)
 
+head(mitch_res$enrichment_result)
 
 #todo
 #- process sim with muscat
