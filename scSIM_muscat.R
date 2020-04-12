@@ -192,3 +192,5 @@ mitch_res <- mitch_calc(x,mysets)
 head(mitch_res$enrichment_result)
 
 #todo need to perform p-adjust for each cell type and then calculate the sensitivity, specificity and F1 score
+#p.adjust()
+sensitivity
