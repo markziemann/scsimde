@@ -192,3 +192,10 @@ mitch_res <- mitch_calc(x,mysets)
 head(mitch_res$enrichment_result)
 
 #todo need to perform p-adjust for each cell type and then calculate the sensitivity, specificity and F1 score
+obs <- mitch_res$enrichment_results$Set
+
+TP = length(intersect(obs,desets))
+FP = length(setdiff(obs,desets))
+FN= length(setdiff(desets,obs))
+TN= length(mysets) - (TP+FP+FN)
+
