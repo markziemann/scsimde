@@ -120,7 +120,7 @@ randomSets <- randomGeneSets(mygenes)
 gs <- vector("list", length(unique(gi$cluster_id)))
 
 # gene sets will consist of nde #genes that are de and nee #genes that are not de (ee)
-nde=20
+nde=50
 nee=30
 nsets=10
 
@@ -192,11 +192,13 @@ mitch_res <- mitch_calc(x,mysets)
 head(mitch_res$enrichment_result)
 
 #todo need to perform p-adjust for each cell type and then calculate the sensitivity, specificity and F1 score
-obs <- mitch_res$enrichment_result$set
+sig <- subset(mitch_res$enrichment_result, p.adjustMANOVA <= 0.05)
 
-TP = length(intersect(obs,desets))
-FP = length(setdiff(obs,desets))
-FN= length(setdiff(desets,obs))
+obs <- sig$set
+
+TP = length(intersect(obs,names(desets)))
+FP = length(setdiff(obs,names(desets)))
+FN= length(setdiff(names(desets),obs))
 TN= length(mysets) - (TP+FP+FN)
 sensitivity=TP/(TP+FN)
 specificity=TN/(TN+FP)
@@ -205,5 +207,4 @@ recall=TP/(TP+FN)
 F1=2*precision*recall/(precision+recall)
 str(F1)
 #p.adjust()
-sensitivity
 save.image("scrna.Rdata")
