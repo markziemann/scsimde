@@ -4,6 +4,7 @@ library(ExperimentHub)
 library(muscat)
 library(sctransform)
 library(mitch)
+library(fgsea)
 
 ##########################################################
 # Prepare the KANG data to use as a template for simulation 
@@ -187,12 +188,13 @@ mysets <- c(desets,randomSets)
 
 x <- mitch_import(res$table$B, DEtype = "muscat", geneIDcol = "gene")
 
-mitch_res <- mitch_calc(x,mysets)
+mitch_res <- mitch_calc(x,mysets,minsetsize = 5)
+#difereene 37...
 
 head(mitch_res$enrichment_result)
 
 #todo need to perform p-adjust for each cell type and then calculate the sensitivity, specificity and F1 score
-sig <- subset(mitch_res$enrichment_result, p.adjustMANOVA <= 0.05)
+sig <- subset(mitch_res$enrichment_result, p.adjustMANOVA <= 0.1)
 
 obs <- sig$set
 
@@ -207,4 +209,30 @@ recall=TP/(TP+FN)
 F1=2*precision*recall/(precision+recall)
 str(F1)
 #p.adjust()
-save.image("scrna.Rdata")
+MITCHRES<-c(TP,TN,FN,sensitivity,specificity,precision,recall,F1)
+print(MITCHRES)
+
+#make a function that will run fgsea for all of the cell type and report the results,for loop...
+fgseacombine=NULL
+for(col in 1:ncol(x)){
+  stat <- x[,col]
+  names(stat) <- rownames(x)
+  fgseares <- fgsea(pathways = mysets,stats=stat, nperm=10000)
+  obs<-subset(fgseares,padj<0.1)$pathway
+  fgseacombine=c(fgseacombine,obs)
+}
+obs=fgseacombine
+  TP = length(intersect(obs,names(desets)))
+  FP = length(setdiff(obs,names(desets)))
+  FN= length(setdiff(names(desets),obs))
+  TN= length(mysets) - (TP+FP+FN)
+  sensitivity=TP/(TP+FN)
+  specificity=TN/(TN+FP)
+  precision=TP/(TP+FP)
+  recall=TP/(TP+FN)
+  F1=2*precision*recall/(precision+recall)
+  print(paste(TP,TN,FN,sensitivity,specificity,precision,recall,F1))
+  FGSEARES<-c(TP,TN,FN,sensitivity,specificity,precision,recall,F1)
+  print(FGSEARES)
+#reating an object outputing name 
+
