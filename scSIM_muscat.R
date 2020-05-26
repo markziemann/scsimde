@@ -41,18 +41,20 @@ ns <- length(sids <- levels(sce$sample_id))
 names(kids) <- kids; names(sids) <- sids
 
 # have a look at the structure of the data
-# str(sce)
-# str(sce@colData@listData$cluster_id)
-# sce@colData@listData$cluster_id
+#str(sce)
+#str(sce@colData@listData$cluster_id)
+#sce@colData@listData$cluster_id
 
 ##########################################################
 # perform the simulation using Muscat simulation functions
 ##########################################################
 # prep. SCE for simulation
 # need to see why we are losing some cell types at this step.
+cnt<-2
+  repeat{
 sce <- prepSim(sce, verbose = TRUE)
 
-# simulate data with 10% DE
+# simulate data with 10% DE#.......
 (sim <- simData(sce,
                 n_genes = 5000, n_cells = 20000,
                 p_dd = c(0.9, 0, 0.1, 0, 0, 0)))
@@ -209,7 +211,10 @@ recall=TP/(TP+FN)
 F1=2*precision*recall/(precision+recall)
 str(F1)
 #p.adjust()
-MITCHRES<-c(TP,TN,FN,sensitivity,specificity,precision,recall,F1)
+MITCHRES<-c("TP"=TP ,"TN"=TN,"FN"=FN,"sensitivity"=sensitivity,"specificity"=specificity,"precision"=precision,"recall"=recall,"F1"=F1)
+m<-("Mitch Analysis")
+print(m)
+print(cnt)
 print(MITCHRES)
 
 #make a function that will run fgsea for all of the cell type and report the results,for loop...
@@ -231,8 +236,16 @@ obs=fgseacombine
   precision=TP/(TP+FP)
   recall=TP/(TP+FN)
   F1=2*precision*recall/(precision+recall)
-  print(paste(TP,TN,FN,sensitivity,specificity,precision,recall,F1))
-  FGSEARES<-c(TP,TN,FN,sensitivity,specificity,precision,recall,F1)
+  #print(paste(TP,TN,FN,sensitivity,specificity,precision,recall,F1))
+  y <- ("Fgsea Analysis")
+  FGSEARES<-c("TP"=TP ,"TN"=TN,"FN"=FN,"sensitivity"=sensitivity,"specificity"=specificity,"precision"=precision,"recall"=recall,"F1"=F1)
+  print(y)
   print(FGSEARES)
-#reating an object outputing name 
+   
+  cnt <- cnt+1
+  if(cnt > 52) {
+    break
+  }
+  }
 
+    
